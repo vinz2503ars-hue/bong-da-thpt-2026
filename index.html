@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ Vòng loại trực tiếp - Giải Bóng Đá Học Sinh THPT Hà Nội 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas để xuất ảnh PNG độ phân giải cao -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts: Be Vietnam Pro (tối ưu tiếng Việt) & Chakra Petch (số tỉ số thể thao) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-main: #0b1120;
+            --card-bg: #111c33;
+            --card-border: #253657;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-gold: #f59e0b;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #060a14;
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .font-sport {
+            font-family: 'Chakra Petch', sans-serif;
+        }
+
+        /* Thanh cuộn ngang mượt mà */
+        .bracket-scroll-wrapper::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        .bracket-scroll-wrapper::-webkit-scrollbar-track {
+            background: #0b1120;
+            border-radius: 8px;
+        }
+
+        .bracket-scroll-wrapper::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 8px;
+        }
+
+        .bracket-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+
+        /* Thẻ trận đấu */
+        .match-card {
+            background: linear-gradient(160deg, #13203b 0%, #0f172a 100%);
+            border: 1px solid #26395c;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .match-card:hover {
+            border-color: #38bdf8;
+        }
+
+        .match-card-qf {
+            border-color: #3b82f6;
+            background: linear-gradient(160deg, #162544 0%, #0f1b33 100%);
+        }
+
+        .match-card-sf {
+            border-color: #06b6d4;
+            background: linear-gradient(160deg, #0f2942 0%, #0c1f33 100%);
+            box-shadow: 0 0 18px rgba(6, 182, 212, 0.14);
+        }
+
+        .match-card-final {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(160deg, #2b210d 0%, #141c2e 100%);
+            box-shadow: 0 0 28px rgba(245, 158, 11, 0.25);
+        }
+
+        .match-card-third {
+            border: 1.5px solid #d97706;
+            background: linear-gradient(160deg, #241912 0%, #111c33 100%);
+        }
+
+        /* Trạng thái thắng / thua cho từng dòng đội */
+        .team-row {
+            transition: background-color 0.18s ease, opacity 0.18s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .team-winner {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.04) 100%);
+            border-left-color: #10b981;
+        }
+
+        .team-loser {
+            opacity: 0.48;
+        }
+
+        /* Đánh dấu nổi bật riêng cho 30. THPT Hà Nội Amsterdam (tự động đi theo khi vào vòng sau) */
+        .team-amsterdam {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.24) 0%, rgba(6, 182, 212, 0.12) 100%) !important;
+            border-left: 3px solid #fbbf24 !important;
+            box-shadow: inset 0 0 12px rgba(245, 158, 11, 0.15);
+        }
+
+        .team-amsterdam.team-loser {
+            opacity: 0.65;
+        }
+
+        /* Highlight khi tìm kiếm */
+        .team-search-hit {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.35) 0%, rgba(56, 189, 248, 0.16) 100%) !important;
+            border-left: 3px solid #22d3ee !important;
+            opacity: 1 !important;
+        }
+
+        .match-search-dim {
+            opacity: 0.3;
+        }
+
+        /* Ô nhập tỉ số chính & PEN (Chế độ Admin) */
+        .score-input {
+            width: 34px;
+            height: 24px;
+            text-align: center;
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            background-color: #0b1120;
+            border: 1px solid #334155;
+            border-radius: 5px;
+            color: #f8fafc;
+            outline: none;
+            transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .score-input:focus {
+            border-color: #22d3ee;
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.25);
+            background-color: #0f1c36;
+        }
+
+        .score-input:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background-color: #090e1a;
+            border-style: dashed;
+        }
+
+        .score-input.score-win {
+            border-color: #10b981;
+            color: #34d399;
+            background-color: rgba(16, 185, 129, 0.14);
+        }
+
+        /* Nhãn tỉ số sắc nét cho chế độ Học sinh / Người xem */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 23px;
+            padding: 0 6px;
+            border-radius: 5px;
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            background-color: rgba(15, 23, 42, 0.85);
+            border: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        .score-badge.score-win {
+            border-color: #10b981;
+            color: #34d399;
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .score-badge.score-empty {
+            background-color: transparent;
+            border-color: transparent;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .pen-input {
+            width: 30px;
+            height: 21px;
+            text-align: center;
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            background-color: #0b1120;
+            border: 1px solid #f59e0b;
+            border-radius: 4px;
+            color: #fcd34d;
+            outline: none;
+        }
+
+        .pen-input:focus {
+            border-color: #fde68a;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Nền đồ họa broadcast cho khung chụp ảnh */
+        #bracket-capture {
+            background-color: #0b1120;
+            background-image:
+                radial-gradient(circle at 12% 10%, rgba(6, 182, 212, 0.08) 0%, transparent 32%),
+                radial-gradient(circle at 88% 90%, rgba(245, 158, 11, 0.08) 0%, transparent 32%),
+                linear-gradient(rgba(51, 65, 85, 0.14) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51, 65, 85, 0.14) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 42px 42px, 42px 42px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- THANH CÔNG CỤ ĐIỀU KHIỂN (Nằm ngoài khung xuất ảnh #bracket-capture) -->
+    <header class="sticky top-0 z-50 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-2xl px-4 py-3">
+        <div class="max-w-[2200px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-3">
+
+            <!-- Các tab lọc nhánh đấu -->
+            <div class="flex flex-wrap items-center justify-center gap-1.5" id="filter-tabs">
+                <button data-filter="all"
+                    class="tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-cyan-400 text-slate-950 shadow-md cursor-pointer">
+                    Toàn bộ (64 đội)
+                </button>
+                <button data-filter="tk1"
+                    class="tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700 cursor-pointer">
+                    Nhánh TK 1
+                </button>
+                <button data-filter="tk2"
+                    class="tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700 cursor-pointer">
+                    Nhánh TK 2
+                </button>
+                <button data-filter="tk3"
+                    class="tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700 cursor-pointer">
+                    Nhánh TK 3
+                </button>
+                <button data-filter="tk4"
+                    class="tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-slate-800/90 text-slate-200 hover:bg-slate-700 border border-slate-700 cursor-pointer">
+                    Nhánh TK 4
+                </button>
+                <button data-filter="finals"
+                    class="tab-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-slate-800/90 text-amber-400 hover:bg-slate-700 border border-amber-500/40 cursor-pointer">
+                    Bán kết &amp; Chung kết
+                </button>
+            </div>
+
+            <!-- Ô tìm kiếm, trạng thái đồng bộ, nút Admin & Xuất ảnh -->
+            <div class="flex flex-wrap items-center justify-center gap-2 w-full xl:w-auto">
+                <!-- Tìm kiếm nhanh trường -->
+                <div class="relative flex-1 sm:flex-initial sm:w-56">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 pointer-events-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="search-input" placeholder="Tìm tên trường (Enter)..."
+                        class="w-full pl-9 pr-8 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 transition-colors">
+                    <button id="clear-search" title="Xóa tìm kiếm"
+                        class="hidden absolute inset-y-0 right-2.5 flex items-center text-slate-400 hover:text-white text-xs font-bold cursor-pointer">
+                        ✕
+                    </button>
+                </div>
+
+                <!-- Thống kê số trận đã nhập -->
+                <div
+                    class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Đã xong: <strong id="completed-count"
+                            class="text-emerald-400 font-sport text-sm">0/64</strong></span>
+                </div>
+
+                <!-- Huy hiệu trạng thái đồng bộ đám mây -->
+                <div id="sync-status-badge"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-medium text-cyan-300"
+                    title="Trạng thái đồng bộ dữ liệu">
+                    <span id="sync-status-icon">⏳</span>
+                    <span id="sync-status-text">Đang tải...</span>
+                </div>
+
+                <!-- Nút Làm mới tỉ số (Dành cho mọi người xem) -->
+                <button id="refresh-data-btn" title="Tải lại tỉ số mới nhất từ máy chủ"
+                    class="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-slate-800 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/20 hover:border-cyan-400 active:scale-95 transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span class="hidden sm:inline">Làm mới</span>
+                </button>
+
+                <!-- NHÓM NÚT CHỈ HIỆN KHI ADMIN ĐĂNG NHẬP -->
+                <div id="admin-tools" class="hidden flex flex-wrap items-center justify-center gap-2">
+                    <!-- Huy hiệu đang ở chế độ Admin -->
+                    <span
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/50 text-amber-300 text-xs font-bold">
+                        🛡️ Admin
+                    </span>
+
+                    <!-- Nút Lưu file dự phòng (.json) -->
+                    <button id="export-json-btn" title="Tải file dự phòng chứa toàn bộ tỉ số hiện tại"
+                        class="flex items-center gap-1 px-2.5 py-2 rounded-lg font-semibold text-xs bg-slate-800 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/20 hover:border-emerald-400 active:scale-95 transition-all cursor-pointer">
+                        <span>Sao lưu .json</span>
+                    </button>
+
+                    <!-- Nút Nạp file dự phòng (.json) -->
+                    <button id="import-json-btn" title="Khôi phục toàn bộ tỉ số từ file .json đã lưu"
+                        class="flex items-center gap-1 px-2.5 py-2 rounded-lg font-semibold text-xs bg-slate-800 text-sky-300 border border-sky-500/40 hover:bg-sky-500/20 hover:border-sky-400 active:scale-95 transition-all cursor-pointer">
+                        <span>Nạp .json</span>
+                    </button>
+                    <input type="file" id="import-json-input" accept=".json,application/json" class="hidden">
+
+                    <!-- Nút Đặt lại tỉ số -->
+                    <button id="reset-scores-btn"
+                        class="flex items-center gap-1 px-3 py-2 rounded-lg font-semibold text-xs bg-slate-800 text-rose-300 border border-rose-500/40 hover:bg-rose-500/20 hover:border-rose-400 active:scale-95 transition-all cursor-pointer">
+                        <span>Đặt lại tỉ số</span>
+                    </button>
+
+                    <!-- Nút Đăng xuất Admin -->
+                    <button id="admin-logout-btn" title="Thoát quyền chỉnh sửa Admin"
+                        class="flex items-center gap-1 px-3 py-2 rounded-lg font-semibold text-xs bg-slate-800 text-slate-300 border border-slate-600 hover:bg-slate-700 hover:text-white active:scale-95 transition-all cursor-pointer">
+                        <span>Đăng xuất</span>
+                    </button>
+                </div>
+
+                <!-- Nút Đăng nhập Admin (Ẩn khi đã đăng nhập) -->
+                <button id="admin-login-btn" title="Đăng nhập tài khoản Admin để nhập tỉ số"
+                    class="flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-slate-800 text-amber-300 border border-amber-500/40 hover:bg-amber-500/20 hover:border-amber-400 active:scale-95 transition-all cursor-pointer">
+                    <span>🔒 Admin</span>
+                </button>
+
+                <!-- Nút Tải ảnh PNG -->
+                <button id="export-png-btn"
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg font-bold text-xs sm:text-sm bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-cyan-500/20 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Tải ảnh PNG</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MODAL ĐĂNG NHẬP ADMIN -->
+    <div id="login-modal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-[#111c33] border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 flex-shrink-0 text-lg">
+                    🔒
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Đăng nhập Quản trị viên</h3>
+                    <p class="text-xs text-slate-400">Chỉ Admin mới có quyền cập nhật tỉ số.</p>
+                </div>
+            </div>
+
+            <form id="login-form" class="space-y-3.5">
+                <div>
+                    <label for="admin-username" class="block text-xs font-semibold text-slate-300 mb-1">Tài
+                        khoản</label>
+                    <input type="text" id="admin-username" autocomplete="username" placeholder="Nhập tài khoản..."
+                        required
+                        class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label for="admin-password" class="block text-xs font-semibold text-slate-300 mb-1">Mật khẩu</label>
+                    <input type="password" id="admin-password" autocomplete="current-password"
+                        placeholder="Nhập mật khẩu..." required
+                        class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+                </div>
+
+                <p id="login-error"
+                    class="hidden text-xs font-medium text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">
+                    Sai tài khoản hoặc mật khẩu!
+                </p>
+
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <button type="button" id="cancel-login-btn"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer">
+                        Đóng
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 rounded-lg text-sm font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors cursor-pointer">
+                        Đăng nhập
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL XÁC NHẬN ĐẶT LẠI TỈ SỐ (Không dùng window.confirm) -->
+    <div id="reset-modal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-[#111c33] border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Xác nhận đặt lại toàn bộ tỉ số?</h3>
+                    <p class="text-xs text-slate-400">Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-300 mb-6 leading-relaxed">
+                Toàn bộ tỉ số chính thức, tỉ số luân lưu (PEN) và các đội đã đi tiếp từ Vòng 1/16 đến Chung kết sẽ được
+                xóa sạch về trạng thái ban đầu.
+            </p>
+            <div class="flex items-center justify-end gap-2.5">
+                <button id="cancel-reset-btn"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer">
+                    Hủy bỏ
+                </button>
+                <button id="confirm-reset-btn"
+                    class="px-4 py-2 rounded-lg text-sm font-bold bg-rose-600 text-white hover:bg-rose-500 transition-colors cursor-pointer">
+                    Xóa toàn bộ tỉ số
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- THÔNG BÁO TOAST -->
+    <div id="toast-notification"
+        class="fixed bottom-5 right-5 z-50 hidden items-center gap-3 bg-[#111c33] border-2 border-cyan-400 text-white px-4 py-3 rounded-xl shadow-2xl">
+        <div id="toast-spinner" class="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin">
+        </div>
+        <span id="toast-message" class="text-sm font-medium">Đang xử lý...</span>
+    </div>
+
+    <!-- KHUNG CUỘN XEM SƠ ĐỒ -->
+    <main class="flex-1 bracket-scroll-wrapper overflow-x-auto p-3 sm:p-6">
+
+        <!-- VÙNG CHỤP ẢNH XUẤT FILE PNG (#bracket-capture) -->
+        <div id="bracket-capture" class="mx-auto rounded-2xl border border-slate-700/80 p-6 sm:p-8 shadow-2xl relative"
+            style="width: 2160px;">
+
+            <!-- HEADER GIẢI ĐẤU -->
+            <div class="flex items-center justify-between border-b-2 border-slate-700/80 pb-5 mb-6 relative z-10">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 p-0.5 shadow-lg shadow-amber-500/20 flex-shrink-0">
+                        <div class="w-full h-full bg-[#0b1120] rounded-2xl flex items-center justify-center">
+                            <svg class="w-9 h-9 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 3.3l1.35-.95c1.82.56 3.37 1.76 4.38 3.34l-.39 1.34-1.35.46L13 6.7V5.3zm-3.35-.95L11 5.3v1.4L7.01 9.49l-1.35-.46-.39-1.34c1.01-1.58 2.56-2.78 4.38-3.34zM7.08 17.11l-1.14.1C4.73 15.81 4 13.99 4 12c0-.12.01-.23.02-.35l1-.73 1.38.48 1.46 4.34-.78 1.37zm7.42 2.48c-.79.26-1.63.41-2.5.41s-1.71-.15-2.5-.41l-.69-1.49.64-1.1h5.11l.64 1.1-.7 1.49zM14.27 15H9.73l-1.35-4.02L12 8.44l3.63 2.54L14.27 15zm3.79 2.21l-1.14-.1-.79-1.37 1.46-4.34 1.39-.47 1 .73c.01.11.02.22.02.34 0 1.99-.73 3.81-1.94 5.21z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span
+                                class="px-2.5 py-0.5 rounded text-xs font-extrabold tracking-wider uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/40">
+                                Mùa giải 2026 • 64 Đội Xuất Sắc Nhất
+                            </span>
+                            <span
+                                class="px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40">
+                                Vòng Loại Trực Tiếp (Knockout)
+                            </span>
+                        </div>
+                        <h1
+                            class="font-sport text-2xl sm:text-3xl font-bold tracking-wide text-white uppercase leading-tight">
+                            GIẢI BÓNG ĐÁ HỌC SINH THPT HÀ NỘI - BÁO AN NINH THỦ ĐÔ 2026
+                        </h1>
+                        <p class="text-slate-300 text-sm mt-0.5">
+                            Sơ đồ thi đấu tương tác từ <strong class="text-cyan-400">Vòng 1/32</strong> đến <strong
+                                class="text-amber-400">Trận Chung Kết</strong> (18/11/2026 – 13/12/2026) • Tự động tính
+                            luân lưu PEN &amp; cập nhật nhánh đấu
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chú thích màu sắc -->
+                <div
+                    class="flex flex-col items-end gap-1.5 text-xs bg-[#111c33]/90 px-4 py-2.5 rounded-xl border border-slate-700">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-sm bg-amber-400 inline-block"></span>
+                        <span class="text-slate-200 font-medium">Đội đánh dấu: <strong class="text-amber-400">30. THPT
+                                Hà Nội Amsterdam ★</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-sm bg-emerald-400 inline-block"></span>
+                        <span class="text-slate-300">Đội thắng tự động đi tiếp • Hòa tỉ số tính luân lưu <strong
+                                class="text-amber-300">PEN</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LỚP SVG VẼ ĐƯỜNG NỐI NHÁNH ĐẤU -->
+            <svg id="bracket-svg-layer" class="absolute top-0 left-0 pointer-events-none z-0" width="2160"
+                height="2600"></svg>
+
+            <!-- NỘI DUNG SƠ ĐỒ -->
+            <div id="bracket-content" class="relative z-10"></div>
+
+            <!-- FOOTER -->
+            <div
+                class="mt-6 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 relative z-10">
+                <span>Giải Bóng Đá Học Sinh THPT Hà Nội - Báo An Ninh Thủ Đô 2026</span>
+                <span>Thể thức: Loại trực tiếp 1 lượt trận (Hòa đá luân lưu PEN) • Cập nhật đầy đủ 64 trận [201] –
+                    [264]</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * =====================================================================
+         * 0. CẤU HÌNH NHANH (BẠN CHỈ CẦN DÁN 1 LINK FIREBASE VÀO DÒNG DƯỚI ĐÂY)
+         * =====================================================================
+         * Ví dụ: 'https://giai-bong-da-2026-default-rtdb.asia-southeast1.firebasedatabase.app'
+         * (Để trống '' nếu chỉ muốn chạy thử và lưu tạm trên máy tính cá nhân)
+         */
+        const FIREBASE_DB_URL = 'https://bong-da-thpt-hn-2026-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+        // Tài khoản Admin duy nhất được sửa tỉ số
+        const ADMIN_CONFIG = {
+            username: 'vinhdc2009',
+            password: 'vinhdc2009',
+            authStorageKey: 'thpt_hn_2026_is_admin',
+            cacheStorageKey: 'thpt_hn_2026_scores_cache',
+            autoRefreshMs: 45000 // Tự động tải tỉ số mới mỗi 45 giây cho người xem
+        };
+
+        /**
+         * Chuẩn hóa link Firebase Realtime Database thành endpoint .json
+         */
+        function getFirebaseEndpoint() {
+            const raw = (FIREBASE_DB_URL || '').trim().replace(/\/+$/, '');
+            if (!raw) return '';
+            if (raw.endsWith('.json')) return raw;
+            return `${raw}/scores.json`;
+        }
+
+        /**
+         * =====================================================================
+         * 1. CẤU TRÚC DỮ LIỆU GIẢI ĐẤU (64 ĐỘI & 64 TRẬN ĐẤU [201] - [264])
+         * =====================================================================
+         */
+        const BRANCH_META = [
+            {
+                id: 'tk1',
+                title: 'NHÁNH TỨ KẾT 1',
+                subtitle: 'Đội thắng Tứ kết 1 [257] vào Bán kết 1 [261]',
+                headers: {
+                    r32: { title: 'VÒNG 1/32', date: '(T4 18/11)' },
+                    r16: { title: 'VÒNG 1/16', date: '(CN 22/11)' },
+                    r8: { title: 'VÒNG 1/8', date: '(CN 29/11)' },
+                    qf: { title: 'TỨ KẾT 1', date: '(CN 06/12)' }
+                },
+                r32: ['m201', 'm202', 'm203', 'm204', 'm205', 'm206', 'm207', 'm208'],
+                r16: ['m233', 'm234', 'm235', 'm236'],
+                r8: ['m249', 'm250'],
+                qf: 'm257'
+            },
+            {
+                id: 'tk2',
+                title: 'NHÁNH TỨ KẾT 2',
+                subtitle: 'Đội thắng Tứ kết 2 [258] vào Bán kết 1 [261]',
+                headers: {
+                    r32: { title: 'VÒNG 1/32', date: '(T4 18/11 & CN 22/11)' },
+                    r16: { title: 'VÒNG 1/16', date: '(CN 22/11 & T4 25/11)' },
+                    r8: { title: 'VÒNG 1/8', date: '(CN 29/11)' },
+                    qf: { title: 'TỨ KẾT 2', date: '(CN 06/12)' }
+                },
+                r32: ['m209', 'm210', 'm211', 'm212', 'm213', 'm214', 'm215', 'm216'],
+                r16: ['m237', 'm238', 'm239', 'm240'],
+                r8: ['m251', 'm252'],
+                qf: 'm258'
+            },
+            {
+                id: 'tk3',
+                title: 'NHÁNH TỨ KẾT 3',
+                subtitle: 'Đội thắng Tứ kết 3 [259] vào Bán kết 2 [262]',
+                headers: {
+                    r32: { title: 'VÒNG 1/32', date: '(CN 22/11)' },
+                    r16: { title: 'VÒNG 1/16', date: '(T4 25/11)' },
+                    r8: { title: 'VÒNG 1/8', date: '(CN 29/11)' },
+                    qf: { title: 'TỨ KẾT 3', date: '(CN 06/12)' }
+                },
+                r32: ['m217', 'm218', 'm219', 'm220', 'm221', 'm222', 'm223', 'm224'],
+                r16: ['m241', 'm242', 'm243', 'm244'],
+                r8: ['m253', 'm254'],
+                qf: 'm259'
+            },
+            {
+                id: 'tk4',
+                title: 'NHÁNH TỨ KẾT 4',
+                subtitle: 'Đội thắng Tứ kết 4 [260] vào Bán kết 2 [262]',
+                headers: {
+                    r32: { title: 'VÒNG 1/32', date: '(CN 22/11)' },
+                    r16: { title: 'VÒNG 1/16', date: '(T4 25/11)' },
+                    r8: { title: 'VÒNG 1/8', date: '(CN 29/11)' },
+                    qf: { title: 'TỨ KẾT 4', date: '(CN 06/12)' }
+                },
+                r32: ['m225', 'm226', 'm227', 'm228', 'm229', 'm230', 'm231', 'm232'],
+                r16: ['m245', 'm246', 'm247', 'm248'],
+                r8: ['m255', 'm256'],
+                qf: 'm260'
+            }
+        ];
+
+        // Danh sách định nghĩa chuẩn cho 64 trận theo thứ tự tô-pô (từ Vòng 1/32 -> Chung kết)
+        const MATCH_DEFINITIONS = [
+            // ================= NHÁNH TK 1 - VÒNG 1/32 =================
+            { id: 'm201', code: '[201]', time: '13h30 (T4 18/11)', type: 'r32', initTeams: ['1. THPT Quốc Oai (Nhất A)', '2. THPT Việt Hoàng (Nhì Ô)'], nextWin: { id: 'm233', slot: 0 } },
+            { id: 'm202', code: '[202]', time: '13h30 (T4 18/11)', type: 'r32', initTeams: ['3. THPT Xuân Phương (Nhất B)', '4. THPT IVS Thanh Oai (Nhì P)'], nextWin: { id: 'm233', slot: 1 } },
+            { id: 'm203', code: '[203]', time: '13h30 (T4 18/11)', type: 'r32', initTeams: ['5. THPT Hoài Đức C (Nhất C)', '6. THPT Phúc Lợi (Nhì Q)'], nextWin: { id: 'm234', slot: 0 } },
+            { id: 'm204', code: '[204]', time: '13h30 (T4 18/11)', type: 'r32', initTeams: ['7. THPT Tự Lập (Nhất D)', '8. THPT Olympia (Nhì R)'], nextWin: { id: 'm234', slot: 1 } },
+            { id: 'm205', code: '[205]', time: '13h30 (T4 18/11)', type: 'r32', initTeams: ['9. THPT Wellspring (Nhất Đ)', '10. THPT Phan Bội Châu HĐ (Nhì S)'], nextWin: { id: 'm235', slot: 0 } },
+            { id: 'm206', code: '[206]', time: '14h30 (T4 18/11)', type: 'r32', initTeams: ['11. THPT Lê Quý Đôn HĐ (Nhất E)', '12. THPT Phenikaa (Nhì T)'], nextWin: { id: 'm235', slot: 1 } },
+            { id: 'm207', code: '[207]', time: '14h30 (T4 18/11)', type: 'r32', initTeams: ['13. THPT Nguyễn Quốc Trinh (Nhất F)', '14. THPT Bình Minh HĐ (Nhì U)'], nextWin: { id: 'm236', slot: 0 } },
+            { id: 'm208', code: '[208]', time: '14h30 (T4 18/11)', type: 'r32', initTeams: ['15. THPT Đồng Quan (Nhất G)', '16. THPT Lê Lợi HĐ (Nhì Ư)'], nextWin: { id: 'm236', slot: 1 } },
+
+            // ================= NHÁNH TK 2 - VÒNG 1/32 =================
+            { id: 'm209', code: '[209]', time: '14h30 (T4 18/11)', type: 'r32', initTeams: ['17. THPT Trần Quốc Tuấn (Nhất H)', '18. THPT Đông Mỹ (Nhì V)'], nextWin: { id: 'm237', slot: 0 } },
+            { id: 'm210', code: '[210]', time: '14h30 (T4 18/11)', type: 'r32', initTeams: ['19. THPT Nguyễn Du Thanh Oai (Nhất I)', '20. THPT Đỗ Mười (Nhì X)'], nextWin: { id: 'm237', slot: 1 } },
+            { id: 'm211', code: '[211]', time: '15h30 (T4 18/11)', type: 'r32', initTeams: ['21. THPT Chuyên Nguyễn Huệ (Nhất J)', '22. THPT Hữu Nghị T78 (Nhì Y)'], nextWin: { id: 'm238', slot: 0 } },
+            { id: 'm212', code: '[212]', time: '15h30 (T4 18/11)', type: 'r32', initTeams: ['23. THPT Thạch Bàn (Nhất K)', '24. THPT Tây Hồ (Nhì Z)'], nextWin: { id: 'm238', slot: 1 } },
+            { id: 'm213', code: '[213]', time: '15h30 (T4 18/11)', type: 'r32', initTeams: ['25. THPT Galileo (Nhất L)', '26. THPT Chúc Động (Nhì W)'], nextWin: { id: 'm239', slot: 0 } },
+            { id: 'm214', code: '[214]', time: '15h30 (T4 18/11)', type: 'r32', initTeams: ['27. THPT Ngọc Hồi (Nhất M)', '28. THPT Văn Hiến (Nhì AA)'], nextWin: { id: 'm239', slot: 1 } },
+            { id: 'm215', code: '[215]', time: '15h30 (T4 18/11)', type: 'r32', initTeams: ['29. THPT Kim Liên (Nhất N)', '30. THPT Hà Nội Amsterdam (Nhì BB)'], nextWin: { id: 'm240', slot: 0 } },
+            { id: 'm216', code: '[216]', time: '8h00 (CN 22/11)', type: 'r32', initTeams: ['31. THPT Ngô Quyền ĐA (Nhất O)', '32. THPT Chu Văn An (Nhì CC)'], nextWin: { id: 'm240', slot: 1 } },
+
+            // ================= NHÁNH TK 3 - VÒNG 1/32 =================
+            { id: 'm217', code: '[217]', time: '8h00 (CN 22/11)', type: 'r32', initTeams: ['33. THPT Hoàng Văn Thụ (Nhất Ô)', '34. THPT Đại Mỗ (Nhì A)'], nextWin: { id: 'm241', slot: 0 } },
+            { id: 'm218', code: '[218]', time: '8h00 (CN 22/11)', type: 'r32', initTeams: ['35. THPT Phùng Khắc Khoan TT (Nhất P)', '36. THPT Lê Văn Thiêm (Nhì B)'], nextWin: { id: 'm241', slot: 1 } },
+            { id: 'm219', code: '[219]', time: '8h00 (CN 22/11)', type: 'r32', initTeams: ['37. THPT Nguyễn Gia Thiều (Nhất Q)', '38. THPT Khương Hạ (Nhì C)'], nextWin: { id: 'm242', slot: 0 } },
+            { id: 'm220', code: '[220]', time: '8h00 (CN 22/11)', type: 'r32', initTeams: ['39. THPT Xa La (Nhất R)', '40. THPT Lê Quý Đôn MĐ (Nhì D)'], nextWin: { id: 'm242', slot: 1 } },
+            { id: 'm221', code: '[221]', time: '9h00 (CN 22/11)', type: 'r32', initTeams: ['41. THPT Thanh Oai B (Nhất S)', '42. THPT Huỳnh Thúc Kháng (Nhì Đ)'], nextWin: { id: 'm243', slot: 0 } },
+            { id: 'm222', code: '[222]', time: '9h00 (CN 22/11)', type: 'r32', initTeams: ['43. THPT Thực Nghiệm (Nhất T)', '44. THPT Nguyễn Văn Cừ (Nhì E)'], nextWin: { id: 'm243', slot: 1 } },
+            { id: 'm223', code: '[223]', time: '9h00 (CN 22/11)', type: 'r32', initTeams: ['45. THPT Vạn Xuân LB (Nhất U)', '46. THPT Cầu Giấy (Nhì F)'], nextWin: { id: 'm244', slot: 0 } },
+            { id: 'm224', code: '[224]', time: '9h00 (CN 22/11)', type: 'r32', initTeams: ['47. THPT Marie Curie LB (Nhất Ư)', '48. THPT Phú Xuyên A (Nhì G)'], nextWin: { id: 'm244', slot: 1 } },
+
+            // ================= NHÁNH TK 4 - VÒNG 1/32 =================
+            { id: 'm225', code: '[225]', time: '9h00 (CN 22/11)', type: 'r32', initTeams: ['49. THPT Yên Hòa (Nhất V)', '50. THPT Lương Thế Vinh (Nhì H)'], nextWin: { id: 'm245', slot: 0 } },
+            { id: 'm226', code: '[226]', time: '10h00 (CN 22/11)', type: 'r32', initTeams: ['51. THPT Hoài Đức B (Nhất X)', '52. THPT Lý Thường Kiệt VH (Nhì I)'], nextWin: { id: 'm245', slot: 1 } },
+            { id: 'm227', code: '[227]', time: '10h00 (CN 22/11)', type: 'r32', initTeams: ['53. THPT MAY (Nhất Y)', '54. THPT FPT (Nhì J)'], nextWin: { id: 'm246', slot: 0 } },
+            { id: 'm228', code: '[228]', time: '10h00 (CN 22/11)', type: 'r32', initTeams: ['55. THPT Lạc Long Quân (Nhất Z)', '56. THPT Trần Hưng Đạo TX (Nhì K)'], nextWin: { id: 'm246', slot: 1 } },
+            { id: 'm229', code: '[229]', time: '10h00 (CN 22/11)', type: 'r32', initTeams: ['57. THPT Vân Tảo (Nhất W)', '58. THPT Nguyễn Huệ Nghĩa Đô (Nhì L)'], nextWin: { id: 'm247', slot: 0 } },
+            { id: 'm230', code: '[230]', time: '10h00 (CN 22/11)', type: 'r32', initTeams: ['59. THPT Quang Trung HĐ (Nhất AA)', '60. THPT Phùng Khắc Khoan KL (Nhì M)'], nextWin: { id: 'm247', slot: 1 } },
+            { id: 'm231', code: '[231]', time: '13h30 (CN 22/11)', type: 'r32', initTeams: ['61. THPT Phan Đình Phùng (Nhất BB)', '62. THPT Archimedes ĐA (Nhì N)'], nextWin: { id: 'm248', slot: 0 } },
+            { id: 'm232', code: '[232]', time: '13h30 (CN 22/11)', type: 'r32', initTeams: ['63. THPT Green City Academy (Nhất CC)', '64. THPT Đoàn Kết HBT (Nhì O)'], nextWin: { id: 'm248', slot: 1 } },
+
+            // ================= VÒNG 1/16 =================
+            { id: 'm233', code: '[233]', time: 'CN 22/11', type: 'r16', placeholders: ['Thắng [201]', 'Thắng [202]'], nextWin: { id: 'm249', slot: 0 } },
+            { id: 'm234', code: '[234]', time: 'CN 22/11', type: 'r16', placeholders: ['Thắng [203]', 'Thắng [204]'], nextWin: { id: 'm249', slot: 1 } },
+            { id: 'm235', code: '[235]', time: '14h30 (CN 22/11)', type: 'r16', placeholders: ['Thắng [205]', 'Thắng [206]'], nextWin: { id: 'm250', slot: 0 } },
+            { id: 'm236', code: '[236]', time: '14h30 (CN 22/11)', type: 'r16', placeholders: ['Thắng [207]', 'Thắng [208]'], nextWin: { id: 'm250', slot: 1 } },
+
+            { id: 'm237', code: '[237]', time: '14h30 (CN 22/11)', type: 'r16', placeholders: ['Thắng [209]', 'Thắng [210]'], nextWin: { id: 'm251', slot: 0 } },
+            { id: 'm238', code: '[238]', time: '14h30 (CN 22/11)', type: 'r16', placeholders: ['Thắng [211]', 'Thắng [212]'], nextWin: { id: 'm251', slot: 1 } },
+            { id: 'm239', code: '[239]', time: '13h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [213]', 'Thắng [214]'], nextWin: { id: 'm252', slot: 0 } },
+            { id: 'm240', code: '[240]', time: '13h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [215]', 'Thắng [216]'], nextWin: { id: 'm252', slot: 1 } },
+
+            { id: 'm241', code: '[241]', time: '13h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [217]', 'Thắng [218]'], nextWin: { id: 'm253', slot: 0 } },
+            { id: 'm242', code: '[242]', time: '13h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [219]', 'Thắng [220]'], nextWin: { id: 'm253', slot: 1 } },
+            { id: 'm243', code: '[243]', time: '13h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [221]', 'Thắng [222]'], nextWin: { id: 'm254', slot: 0 } },
+            { id: 'm244', code: '[244]', time: '14h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [223]', 'Thắng [224]'], nextWin: { id: 'm254', slot: 1 } },
+
+            { id: 'm245', code: '[245]', time: '14h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [225]', 'Thắng [226]'], nextWin: { id: 'm255', slot: 0 } },
+            { id: 'm246', code: '[246]', time: '14h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [227]', 'Thắng [228]'], nextWin: { id: 'm255', slot: 1 } },
+            { id: 'm247', code: '[247]', time: '14h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [229]', 'Thắng [230]'], nextWin: { id: 'm256', slot: 0 } },
+            { id: 'm248', code: '[248]', time: '14h30 (T4 25/11)', type: 'r16', placeholders: ['Thắng [231]', 'Thắng [232]'], nextWin: { id: 'm256', slot: 1 } },
+
+            // ================= VÒNG 1/8 =================
+            { id: 'm249', code: '[249]', time: '8h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [233]', 'Thắng [234]'], nextWin: { id: 'm257', slot: 0 } },
+            { id: 'm250', code: '[250]', time: '8h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [235]', 'Thắng [236]'], nextWin: { id: 'm257', slot: 1 } },
+            { id: 'm251', code: '[251]', time: '8h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [237]', 'Thắng [238]'], nextWin: { id: 'm258', slot: 0 } },
+            { id: 'm252', code: '[252]', time: '8h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [239]', 'Thắng [240]'], nextWin: { id: 'm258', slot: 1 } },
+            { id: 'm253', code: '[253]', time: '9h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [241]', 'Thắng [242]'], nextWin: { id: 'm259', slot: 0 } },
+            { id: 'm254', code: '[254]', time: '9h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [243]', 'Thắng [244]'], nextWin: { id: 'm259', slot: 1 } },
+            { id: 'm255', code: '[255]', time: '9h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [245]', 'Thắng [246]'], nextWin: { id: 'm260', slot: 0 } },
+            { id: 'm256', code: '[256]', time: '9h00 (CN 29/11)', type: 'r8', placeholders: ['Thắng [247]', 'Thắng [248]'], nextWin: { id: 'm260', slot: 1 } },
+
+            // ================= TỨ KẾT (CN 06/12) =================
+            { id: 'm257', code: '[257]', label: 'TỨ KẾT 1', time: '8h00 (CN 06/12)', type: 'qf', placeholders: ['Thắng [249]', 'Thắng [250]'], nextWin: { id: 'm261', slot: 0 }, nextNote: '──► BÁN KẾT 1 [261]' },
+            { id: 'm258', code: '[258]', label: 'TỨ KẾT 2', time: '8h00 (CN 06/12)', type: 'qf', placeholders: ['Thắng [251]', 'Thắng [252]'], nextWin: { id: 'm261', slot: 1 }, nextNote: '──► BÁN KẾT 1 [261]' },
+            { id: 'm259', code: '[259]', label: 'TỨ KẾT 3', time: '9h00 (CN 06/12)', type: 'qf', placeholders: ['Thắng [253]', 'Thắng [254]'], nextWin: { id: 'm262', slot: 0 }, nextNote: '──► BÁN KẾT 2 [262]' },
+            { id: 'm260', code: '[260]', label: 'TỨ KẾT 4', time: '9h00 (CN 06/12)', type: 'qf', placeholders: ['Thắng [255]', 'Thắng [256]'], nextWin: { id: 'm262', slot: 1 }, nextNote: '──► BÁN KẾT 2 [262]' },
+
+            // ================= BÁN KẾT (T4 09/12) =================
+            { id: 'm261', code: '[261]', label: 'BÁN KẾT 1', time: '13h30 (T4 09/12)', type: 'sf', placeholders: ['Thắng TK1 [257]', 'Thắng TK2 [258]'], nextWin: { id: 'm264', slot: 0 }, nextLose: { id: 'm263', slot: 0 } },
+            { id: 'm262', code: '[262]', label: 'BÁN KẾT 2', time: '14h30 (T4 09/12)', type: 'sf', placeholders: ['Thắng TK3 [259]', 'Thắng TK4 [260]'], nextWin: { id: 'm264', slot: 1 }, nextLose: { id: 'm263', slot: 1 } },
+
+            // ================= TRANH HẠNG 3 & CHUNG KẾT (CN 13/12) =================
+            { id: 'm263', code: '[263]', label: 'TRANH HẠNG 3', time: '13h30 (CN 13/12)', type: 'third', placeholders: ['Thua BK1 [261]', 'Thua BK2 [262]'] },
+            { id: 'm264', code: '[264]', label: 'CHUNG KẾT', time: '14h30 (CN 13/12)', type: 'final', placeholders: ['Thắng BK1 [261]', 'Thắng BK2 [262]'] }
+        ];
+
+        // Trạng thái runtime của toàn bộ 64 trận đấu
+        const matchState = {};
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let isAdmin = false;
+
+        // Quản lý đồng bộ đám mây (Firebase Realtime Database REST API)
+        let saveDebounceTimer = null;
+        let lastSyncedJSON = '';
+
+        /**
+         * =====================================================================
+         * 2. QUẢN LÝ QUYỀN ADMIN & ĐỒNG BỘ FIREBASE REALTIME DATABASE
+         * =====================================================================
+         */
+        function loadAdminSession() {
+            try {
+                isAdmin = localStorage.getItem(ADMIN_CONFIG.authStorageKey) === '1';
+            } catch (_) {
+                isAdmin = false;
+            }
+            updateAdminUI();
+        }
+
+        function setAdminSession(loggedIn) {
+            isAdmin = Boolean(loggedIn);
+            try {
+                if (isAdmin) {
+                    localStorage.setItem(ADMIN_CONFIG.authStorageKey, '1');
+                } else {
+                    localStorage.removeItem(ADMIN_CONFIG.authStorageKey);
+                }
+            } catch (_) { }
+
+            updateAdminUI();
+            renderBracket();
+        }
+
+        function updateAdminUI() {
+            const adminTools = document.getElementById('admin-tools');
+            const loginBtn = document.getElementById('admin-login-btn');
+            if (!adminTools || !loginBtn) return;
+
+            if (isAdmin) {
+                adminTools.classList.remove('hidden');
+                adminTools.classList.add('flex');
+                loginBtn.classList.add('hidden');
+            } else {
+                adminTools.classList.add('hidden');
+                adminTools.classList.remove('flex');
+                loginBtn.classList.remove('hidden');
+            }
+        }
+
+        function updateSyncBadge(status, customText = '') {
+            const badge = document.getElementById('sync-status-badge');
+            const iconEl = document.getElementById('sync-status-icon');
+            const textEl = document.getElementById('sync-status-text');
+            if (!badge || !iconEl || !textEl) return;
+
+            badge.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors';
+
+            if (status === 'loading') {
+                badge.classList.add('bg-slate-900', 'border-cyan-500/40', 'text-cyan-300');
+                iconEl.textContent = '⏳';
+                textEl.textContent = customText || 'Đang tải...';
+            } else if (status === 'saving') {
+                badge.classList.add('bg-amber-500/10', 'border-amber-500/50', 'text-amber-300');
+                iconEl.textContent = '🔄';
+                textEl.textContent = customText || 'Đang lưu...';
+            } else if (status === 'saved') {
+                badge.classList.add('bg-emerald-500/10', 'border-emerald-500/50', 'text-emerald-300');
+                iconEl.textContent = '☁️';
+                textEl.textContent = customText || 'Đã đồng bộ';
+            } else if (status === 'local') {
+                badge.classList.add('bg-slate-900', 'border-amber-500/40', 'text-amber-300');
+                iconEl.textContent = '💾';
+                textEl.textContent = customText || 'Lưu cục bộ (Chưa gắn link Firebase)';
+            } else if (status === 'error') {
+                badge.classList.add('bg-rose-500/10', 'border-rose-500/50', 'text-rose-300');
+                iconEl.textContent = '⚠️';
+                textEl.textContent = customText || 'Lỗi đồng bộ';
+            }
+        }
+
+        function formatNowTime() {
+            const d = new Date();
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        function initState() {
+            MATCH_DEFINITIONS.forEach(def => {
+                matchState[def.id] = {
+                    ...def,
+                    teams: def.initTeams ? [...def.initTeams] : [null, null],
+                    s1: '',
+                    s2: '',
+                    p1: '',
+                    p2: '',
+                    winnerIndex: null,
+                    loserIndex: null
+                };
+            });
+
+            recalculateAllMatches(false);
+        }
+
+        /**
+         * Thu thập toàn bộ tỉ số đã nhập thành object gọn nhẹ
+         */
+        function getScoresPayload() {
+            const payload = {};
+            MATCH_DEFINITIONS.forEach(def => {
+                const m = matchState[def.id];
+                if (m.s1 !== '' || m.s2 !== '' || m.p1 !== '' || m.p2 !== '') {
+                    payload[def.id] = { s1: m.s1, s2: m.s2, p1: m.p1, p2: m.p2 };
+                }
+            });
+            return payload;
+        }
+
+        function saveScoresToLocalCache(scoresPayload) {
+            try {
+                localStorage.setItem(ADMIN_CONFIG.cacheStorageKey, JSON.stringify(scoresPayload));
+            } catch (_) { }
+        }
+
+        function loadScoresFromLocalCache() {
+            try {
+                const raw = localStorage.getItem(ADMIN_CONFIG.cacheStorageKey);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return parsed && typeof parsed === 'object' ? parsed : null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        /**
+         * Áp dụng object tỉ số (từ Firebase, bộ nhớ tạm hoặc file .json) vào sơ đồ
+         */
+        function applyScoresPayload(scoresObj, shouldSyncCloud = false) {
+            const safeScores = scoresObj && typeof scoresObj === 'object' ? scoresObj : {};
+            MATCH_DEFINITIONS.forEach(def => {
+                const m = matchState[def.id];
+                const item = safeScores[def.id] || {};
+                m.s1 = item.s1 !== undefined && item.s1 !== null ? String(item.s1).replace(/[^0-9]/g, '').slice(0, 2) : '';
+                m.s2 = item.s2 !== undefined && item.s2 !== null ? String(item.s2).replace(/[^0-9]/g, '').slice(0, 2) : '';
+                m.p1 = item.p1 !== undefined && item.p1 !== null ? String(item.p1).replace(/[^0-9]/g, '').slice(0, 2) : '';
+                m.p2 = item.p2 !== undefined && item.p2 !== null ? String(item.p2).replace(/[^0-9]/g, '').slice(0, 2) : '';
+                if (!def.initTeams) {
+                    m.teams = [null, null];
+                }
+            });
+
+            recalculateAllMatches(false);
+            saveScoresToLocalCache(getScoresPayload());
+            renderBracket();
+
+            if (shouldSyncCloud) {
+                saveScoresToCloud(true);
+            }
+        }
+
+        /**
+         * Tải dữ liệu tỉ số mới nhất từ Firebase Realtime Database (GET)
+         */
+        async function loadScoresFromCloud(silent = false) {
+            const endpoint = getFirebaseEndpoint();
+
+            // Nếu chưa dán link Firebase -> dùng chế độ lưu tạm trên trình duyệt
+            if (!endpoint) {
+                const cached = loadScoresFromLocalCache();
+                if (cached && !silent) {
+                    lastSyncedJSON = JSON.stringify(cached);
+                    applyScoresPayload(cached, false);
+                }
+                updateSyncBadge('local');
+                return;
+            }
+
+            if (!silent) updateSyncBadge('loading');
+
+            try {
+                const res = await fetch(endpoint, { method: 'GET', cache: 'no-store' });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                // Hỗ trợ cả 2 kiểu: { scores: {...}, updatedAt: ... } hoặc trực tiếp { m201: {...} }
+                let remoteScores = {};
+                if (data && typeof data === 'object') {
+                    remoteScores = (data.scores && typeof data.scores === 'object') ? data.scores : (data.tournament ? {} : data);
+                }
+
+                const remoteJSON = JSON.stringify(remoteScores);
+                if (remoteJSON !== lastSyncedJSON) {
+                    lastSyncedJSON = remoteJSON;
+                    applyScoresPayload(remoteScores, false);
+                }
+
+                updateSyncBadge('saved', `Cập nhật ${formatNowTime()}`);
+            } catch (err) {
+                console.error('Lỗi tải dữ liệu từ Firebase:', err);
+                const cached = loadScoresFromLocalCache();
+                if (cached && !lastSyncedJSON) {
+                    applyScoresPayload(cached, false);
+                }
+                updateSyncBadge('error', 'Lỗi mạng (Xem bản tạm)');
+            }
+        }
+
+        /**
+         * Lưu dữ liệu tỉ số lên Firebase Realtime Database (PUT - Chỉ dành cho Admin)
+         */
+        function saveScoresToCloud(immediate = false) {
+            if (!isAdmin) return;
+
+            const scoresPayload = getScoresPayload();
+            saveScoresToLocalCache(scoresPayload);
+
+            const endpoint = getFirebaseEndpoint();
+            if (!endpoint) {
+                updateSyncBadge('local', 'Đã lưu trên máy này');
+                return;
+            }
+
+            if (saveDebounceTimer) {
+                clearTimeout(saveDebounceTimer);
+                saveDebounceTimer = null;
+            }
+
+            updateSyncBadge('saving');
+
+            const performWrite = async () => {
+                if (!isAdmin) return;
+                const latestPayload = getScoresPayload();
+                const serialized = JSON.stringify(latestPayload);
+                lastSyncedJSON = serialized;
+
+                try {
+                    const res = await fetch(endpoint, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            tournament: 'THPT Hà Nội - Báo An Ninh Thủ Đô 2026',
+                            scores: latestPayload,
+                            updatedAt: Date.now()
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+
+                    updateSyncBadge('saved', `Đã lưu ${formatNowTime()}`);
+                } catch (err) {
+                    console.error('Lỗi lưu dữ liệu lên Firebase:', err);
+                    updateSyncBadge('error', 'Lưu lỗi (Kiểm tra Rules)');
+                }
+            };
+
+            if (immediate) {
+                performWrite();
+            } else {
+                saveDebounceTimer = setTimeout(performWrite, 450);
+            }
+        }
+
+        /**
+         * Xuất toàn bộ tỉ số hiện tại ra file .json dự phòng (Admin)
+         */
+        function exportScoresToJSON() {
+            const exportObj = {
+                tournament: 'Giải Bóng Đá Học Sinh THPT Hà Nội - Báo An Ninh Thủ Đô 2026',
+                exportedAt: new Date().toISOString(),
+                scores: getScoresPayload()
+            };
+
+            const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'ti-so-giai-bong-da-thpt-hn-2026.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast('Đã tải file dự phòng ti-so-giai-bong-da-thpt-hn-2026.json!', false);
+        }
+
+        /**
+         * Đọc file .json dự phòng, khôi phục toàn bộ tỉ số và đồng bộ lên Firebase (Admin)
+         */
+        function importScoresFromJSON(file) {
+            if (!isAdmin || !file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const scoresData = parsed && parsed.scores ? parsed.scores : parsed;
+
+                    if (!scoresData || typeof scoresData !== 'object' || Array.isArray(scoresData)) {
+                        throw new Error('Định dạng file không hợp lệ');
+                    }
+
+                    applyScoresPayload(scoresData, true);
+                    showToast('Đã khôi phục toàn bộ tỉ số từ file .json thành công!', false);
+                } catch (err) {
+                    console.error('Lỗi đọc file JSON:', err);
+                    showToast('File .json không hợp lệ. Vui lòng chọn đúng file tỉ số đã lưu!', false);
+                }
+            };
+            reader.onerror = () => {
+                showToast('Không thể đọc file. Vui lòng thử lại!', false);
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        /**
+         * Chuyển chuỗi điểm thành số nguyên hợp lệ (0-99) hoặc null
+         */
+        function parseScore(val) {
+            if (val === '' || val === null || val === undefined) return null;
+            const n = Number(val);
+            if (!Number.isInteger(n) || n < 0 || n > 99) return null;
+            return n;
+        }
+
+        /**
+         * Tính toán đội thắng/thua của một trận đấu
+         */
+        function evaluateMatch(m) {
+            m.winnerIndex = null;
+            m.loserIndex = null;
+
+            if (!m.teams[0] || !m.teams[1]) {
+                m.p1 = '';
+                m.p2 = '';
+                return;
+            }
+
+            const n1 = parseScore(m.s1);
+            const n2 = parseScore(m.s2);
+
+            if (n1 === null || n2 === null) {
+                m.p1 = '';
+                m.p2 = '';
+                return;
+            }
+
+            if (n1 > n2) {
+                m.p1 = '';
+                m.p2 = '';
+                m.winnerIndex = 0;
+                m.loserIndex = 1;
+            } else if (n2 > n1) {
+                m.p1 = '';
+                m.p2 = '';
+                m.winnerIndex = 1;
+                m.loserIndex = 0;
+            } else {
+                const pn1 = parseScore(m.p1);
+                const pn2 = parseScore(m.p2);
+                if (pn1 !== null && pn2 !== null) {
+                    if (pn1 > pn2) {
+                        m.winnerIndex = 0;
+                        m.loserIndex = 1;
+                    } else if (pn2 > pn1) {
+                        m.winnerIndex = 1;
+                        m.loserIndex = 0;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Lan truyền toàn bộ kết quả theo thứ tự tô-pô (R32 -> R16 -> R8 -> QF -> SF -> 3rd & Final).
+         */
+        function recalculateAllMatches(persist = true) {
+            const incomingTeams = {};
+            MATCH_DEFINITIONS.forEach(def => {
+                if (!def.initTeams) {
+                    incomingTeams[def.id] = [null, null];
+                }
+            });
+
+            const changedMatchIds = new Set();
+            let completedCount = 0;
+
+            MATCH_DEFINITIONS.forEach(def => {
+                const m = matchState[def.id];
+
+                if (!def.initTeams) {
+                    const nextT0 = incomingTeams[def.id][0];
+                    const nextT1 = incomingTeams[def.id][1];
+                    if (m.teams[0] !== nextT0 || m.teams[1] !== nextT1) {
+                        m.teams[0] = nextT0;
+                        m.teams[1] = nextT1;
+                        m.s1 = '';
+                        m.s2 = '';
+                        m.p1 = '';
+                        m.p2 = '';
+                        changedMatchIds.add(m.id);
+                    }
+                }
+
+                const prevWinner = m.winnerIndex;
+                evaluateMatch(m);
+                if (m.winnerIndex !== prevWinner) {
+                    changedMatchIds.add(m.id);
+                }
+
+                if (m.winnerIndex !== null) {
+                    completedCount++;
+                    const winnerTeam = m.teams[m.winnerIndex];
+                    const loserTeam = m.teams[m.loserIndex];
+
+                    if (m.nextWin) {
+                        incomingTeams[m.nextWin.id][m.nextWin.slot] = winnerTeam;
+                    }
+                    if (m.nextLose) {
+                        incomingTeams[m.nextLose.id][m.nextLose.slot] = loserTeam;
+                    }
+                }
+            });
+
+            const countEl = document.getElementById('completed-count');
+            if (countEl) countEl.textContent = `${completedCount}/64`;
+
+            if (persist) saveScoresToCloud(false);
+            return changedMatchIds;
+        }
+
+        /**
+         * =====================================================================
+         * 3. RENDER GIAO DIỆN THẺ TRẬN ĐẤU, BẢNG VINH DANH & SƠ ĐỒ
+         * =====================================================================
+         */
+        function buildTeamRowHTML(m, slotIndex) {
+            const teamName = m.teams[slotIndex];
+            const placeholder = m.placeholders ? m.placeholders[slotIndex] : 'Chưa xác định';
+            const displayText = teamName || placeholder;
+            const isFilled = Boolean(teamName);
+            const isAmsterdam = isFilled && teamName.includes('Hà Nội Amsterdam');
+            const isSearchHit = currentSearch.length > 0 && displayText.toLowerCase().includes(currentSearch.toLowerCase());
+
+            const isWinner = m.winnerIndex === slotIndex;
+            const isLoser = m.loserIndex === slotIndex;
+
+            const scoreVal = slotIndex === 0 ? m.s1 : m.s2;
+            const fieldKey = slotIndex === 0 ? 's1' : 's2';
+
+            let rowClasses = 'team-row flex items-center justify-between gap-2 px-2.5 py-1.5 text-xs';
+            if (isSearchHit) rowClasses += ' team-search-hit';
+            else if (isAmsterdam) rowClasses += ' team-amsterdam';
+            else if (isWinner) rowClasses += ' team-winner';
+            if (isLoser && !isSearchHit) rowClasses += ' team-loser';
+
+            let mainName = displayText;
+            let seedBadge = '';
+            if (isFilled) {
+                const matchSeed = displayText.match(/^(.*?)(\s*\((?:Nhất|Nhì)\s+[^)]+\))$/);
+                if (matchSeed) {
+                    mainName = matchSeed[1];
+                    const seedText = matchSeed[2].trim().replace(/[()]/g, '');
+                    const isFirst = seedText.startsWith('Nhất');
+                    seedBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0 ${isFirst
+                            ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                            : 'bg-slate-700/80 text-slate-300 border border-slate-600/80'
+                        }">${seedText}</span>`;
+                }
+            }
+
+            const amsStar = isAmsterdam ? `<span class="text-amber-400 ml-1" title="Đội đánh dấu nổi bật">★</span>` : '';
+            const winCheck = isWinner ? `<span class="text-emerald-400 font-extrabold mr-1 flex-shrink-0" title="Đội thắng">✓</span>` : '';
+
+            const textColorClass = !isFilled
+                ? 'text-slate-500 italic font-normal'
+                : isAmsterdam
+                    ? 'text-amber-300 font-bold'
+                    : isWinner
+                        ? 'text-emerald-300 font-bold'
+                        : 'text-slate-100 font-medium';
+
+            // Admin thấy ô input để gõ; Học sinh / Người xem thấy nhãn tỉ số broadcast sạch đẹp
+            let scoreControlHTML = '';
+            if (isAdmin) {
+                scoreControlHTML = `
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="2"
+                        autocomplete="off"
+                        class="score-input ${isWinner ? 'score-win' : ''}"
+                        data-match="${m.id}"
+                        data-field="${fieldKey}"
+                        value="${scoreVal}"
+                        placeholder="-"
+                        ${isFilled ? '' : 'disabled'}
+                        aria-label="Tỉ số ${displayText}"
+                    >
+                `;
+            } else {
+                const hasScore = scoreVal !== '';
+                scoreControlHTML = `
+                    <span class="score-badge ${isWinner ? 'score-win' : ''} ${hasScore ? '' : 'score-empty'}">
+                        ${hasScore ? scoreVal : '–'}
+                    </span>
+                `;
+            }
+
+            return `
+                <div class="${rowClasses}" data-slot="${slotIndex}">
+                    <div class="flex items-center min-w-0 flex-1 gap-1">
+                        ${winCheck}
+                        <span class="truncate leading-tight ${textColorClass}" title="${displayText}">
+                            ${mainName}${amsStar}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        ${seedBadge}
+                        ${scoreControlHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function buildMatchInnerHTML(m) {
+            let headerBg = 'bg-slate-950/65 border-b border-slate-700/70';
+            let codeColor = 'text-cyan-400';
+
+            if (m.type === 'qf') {
+                codeColor = 'text-sky-400';
+            } else if (m.type === 'sf') {
+                codeColor = 'text-cyan-300';
+            } else if (m.type === 'final') {
+                headerBg = 'bg-amber-500/20 border-b border-amber-500/40';
+                codeColor = 'text-amber-300';
+            } else if (m.type === 'third') {
+                headerBg = 'bg-amber-700/20 border-b border-amber-600/40';
+                codeColor = 'text-amber-400';
+            }
+
+            const n1 = parseScore(m.s1);
+            const n2 = parseScore(m.s2);
+            const isTied = Boolean(m.teams[0] && m.teams[1] && n1 !== null && n2 !== null && n1 === n2);
+
+            let penRowHTML = '';
+            if (isTied && isAdmin) {
+                penRowHTML = `
+                    <div class="pen-row flex items-center justify-between px-2.5 py-1.5 bg-amber-500/10 border-t border-amber-500/35 text-[11px]" data-pen-box="${m.id}">
+                        <span class="font-sport font-bold text-amber-300 tracking-wide flex items-center gap-1">
+                            <span>⚽ PEN</span>
+                            ${m.winnerIndex === null ? '<span class="text-[10px] font-sans font-normal text-amber-200/80">(Nhập luân lưu)</span>' : ''}
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="2"
+                                autocomplete="off"
+                                class="pen-input"
+                                data-match="${m.id}"
+                                data-field="p1"
+                                value="${m.p1}"
+                                placeholder="0"
+                                aria-label="PEN đội trên"
+                            >
+                            <span class="text-amber-400 font-bold">-</span>
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="2"
+                                autocomplete="off"
+                                class="pen-input"
+                                data-match="${m.id}"
+                                data-field="p2"
+                                value="${m.p2}"
+                                placeholder="0"
+                                aria-label="PEN đội dưới"
+                            >
+                        </div>
+                    </div>
+                `;
+            } else if (isTied && !isAdmin && (m.p1 !== '' || m.p2 !== '')) {
+                penRowHTML = `
+                    <div class="pen-row pen-display flex items-center justify-between px-2.5 py-1 bg-amber-500/10 border-t border-amber-500/35 text-[11px]">
+                        <span class="font-sport font-bold text-amber-300 tracking-wide">⚽ LUÂN LƯU (PEN)</span>
+                        <span class="font-sport font-bold text-amber-200 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/45">
+                            ${m.p1 || '0'} - ${m.p2 || '0'}
+                        </span>
+                    </div>
+                `;
+            }
+
+            const nextNoteHTML = m.nextNote
+                ? `<div class="px-2.5 py-1 bg-cyan-500/10 border-t border-cyan-500/25 text-[10px] font-bold text-cyan-300 text-right tracking-wide">${m.nextNote}</div>`
+                : '';
+
+            return `
+                <div class="flex items-center justify-between px-2.5 py-1 ${headerBg} text-[11px]">
+                    <span class="font-sport font-bold ${codeColor}">${m.code}${m.label ? ' • ' + m.label : ''}</span>
+                    <span class="text-slate-300 font-medium">${m.time}</span>
+                </div>
+                <div class="divide-y divide-slate-800/90">
+                    ${buildTeamRowHTML(m, 0)}
+                    ${buildTeamRowHTML(m, 1)}
+                </div>
+                ${penRowHTML}
+                ${nextNoteHTML}
+            `;
+        }
+
+        function createMatchCardHTML(matchId) {
+            const m = matchState[matchId];
+            let cardClass = 'match-card';
+            if (m.type === 'qf') cardClass += ' match-card-qf';
+            else if (m.type === 'sf') cardClass += ' match-card-sf';
+            else if (m.type === 'final') cardClass += ' match-card-final';
+            else if (m.type === 'third') cardClass += ' match-card-third';
+
+            let dimClass = '';
+            if (currentSearch.length > 0) {
+                const hay = [
+                    m.code,
+                    m.teams[0] || (m.placeholders ? m.placeholders[0] : ''),
+                    m.teams[1] || (m.placeholders ? m.placeholders[1] : '')
+                ].join(' ').toLowerCase();
+                if (!hay.includes(currentSearch.toLowerCase())) {
+                    dimClass = 'match-search-dim';
+                }
+            }
+
+            const nextAttr = m.nextWin ? `data-next="${m.nextWin.id}"` : '';
+
+            return `
+                <div id="${m.id}" ${nextAttr} class="${cardClass} ${dimClass} w-full overflow-hidden">
+                    ${buildMatchInnerHTML(m)}
+                </div>
+            `;
+        }
+
+        function buildPodiumHTML() {
+            const finalMatch = matchState['m264'];
+            const thirdMatch = matchState['m263'];
+
+            const champion = finalMatch.winnerIndex !== null ? finalMatch.teams[finalMatch.winnerIndex] : null;
+            const runnerUp = finalMatch.loserIndex !== null ? finalMatch.teams[finalMatch.loserIndex] : null;
+            const thirdPlace = thirdMatch.winnerIndex !== null ? thirdMatch.teams[thirdMatch.winnerIndex] : null;
+
+            if (!champion && !thirdPlace) return '';
+
+            return `
+                <div id="podium-banner" class="rounded-xl border-2 border-amber-400/80 bg-gradient-to-br from-amber-500/20 via-[#1a1c2e] to-[#0f172a] p-3.5 shadow-xl shadow-amber-500/15">
+                    <div class="text-center pb-2 mb-2 border-b border-amber-500/30">
+                        <span class="font-sport text-xs font-extrabold uppercase tracking-widest text-amber-300">
+                            🏆 VINH DANH MÙA GIẢI 2026 🏆
+                        </span>
+                    </div>
+                    ${champion ? `
+                        <div class="text-center mb-2.5 bg-amber-400/15 border border-amber-400/50 rounded-lg p-2">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">👑 NHÀ VÔ ĐỊCH</div>
+                            <div class="text-sm font-extrabold text-white mt-0.5 leading-snug">${champion}</div>
+                        </div>
+                    ` : ''}
+                    <div class="space-y-1.5 text-xs">
+                        ${runnerUp ? `
+                            <div class="flex items-center justify-between gap-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-600/60">
+                                <span class="text-[10px] font-bold text-slate-300 uppercase flex-shrink-0">🥈 Á QUÂN</span>
+                                <span class="font-semibold text-slate-100 truncate" title="${runnerUp}">${runnerUp}</span>
+                            </div>
+                        ` : ''}
+                        ${thirdPlace ? `
+                            <div class="flex items-center justify-between gap-2 bg-amber-900/25 px-2.5 py-1.5 rounded-lg border border-amber-700/50">
+                                <span class="text-[10px] font-bold text-amber-400 uppercase flex-shrink-0">🥉 HẠNG BA</span>
+                                <span class="font-semibold text-amber-100 truncate" title="${thirdPlace}">${thirdPlace}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBracket() {
+            const container = document.getElementById('bracket-content');
+            const captureEl = document.getElementById('bracket-capture');
+
+            if (currentFilter === 'finals') {
+                captureEl.style.width = '1360px';
+                container.innerHTML = renderFinalsOnlyHTML();
+                requestAnimationFrame(drawBracketLines);
+                return;
+            }
+
+            captureEl.style.width = '2160px';
+            const visibleBranches = currentFilter === 'all'
+                ? BRANCH_META
+                : BRANCH_META.filter(b => b.id === currentFilter);
+
+            let html = `<div class="grid grid-cols-12 gap-7 items-stretch">`;
+
+            html += `<div class="col-span-9 flex flex-col gap-7">`;
+            visibleBranches.forEach(branch => {
+                html += `
+                    <div class="bg-[#0e172a]/80 rounded-xl border border-slate-700/80 p-4 relative">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-2.5 py-0.5 rounded bg-cyan-400 text-slate-950 font-sport font-bold text-xs">${branch.title}</span>
+                                <span class="text-xs text-slate-300 font-medium">${branch.subtitle}</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-5 mb-3 text-center">
+                            <div class="col-span-4 bg-slate-900/90 py-1.5 px-2 rounded-lg border border-slate-700">
+                                <div class="font-sport font-bold text-xs text-cyan-400">${branch.headers.r32.title}</div>
+                                <div class="text-[11px] text-slate-300">${branch.headers.r32.date}</div>
+                            </div>
+                            <div class="col-span-3 bg-slate-900/90 py-1.5 px-2 rounded-lg border border-slate-700">
+                                <div class="font-sport font-bold text-xs text-cyan-400">${branch.headers.r16.title}</div>
+                                <div class="text-[11px] text-slate-300">${branch.headers.r16.date}</div>
+                            </div>
+                            <div class="col-span-2 bg-slate-900/90 py-1.5 px-2 rounded-lg border border-slate-700">
+                                <div class="font-sport font-bold text-xs text-cyan-400">${branch.headers.r8.title}</div>
+                                <div class="text-[11px] text-slate-300">${branch.headers.r8.date}</div>
+                            </div>
+                            <div class="col-span-3 bg-[#152445] py-1.5 px-2 rounded-lg border border-blue-500/70">
+                                <div class="font-sport font-bold text-xs text-amber-400">${branch.headers.qf.title}</div>
+                                <div class="text-[11px] text-slate-200">${branch.headers.qf.date}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-5 items-stretch">
+                            <div class="col-span-4 flex flex-col justify-between gap-2.5">
+                                ${branch.r32.map(id => createMatchCardHTML(id)).join('')}
+                            </div>
+                            <div class="col-span-3 flex flex-col justify-around py-4 gap-3">
+                                ${branch.r16.map(id => createMatchCardHTML(id)).join('')}
+                            </div>
+                            <div class="col-span-2 flex flex-col justify-around py-12 gap-4">
+                                ${branch.r8.map(id => createMatchCardHTML(id)).join('')}
+                            </div>
+                            <div class="col-span-3 flex flex-col justify-center">
+                                ${createMatchCardHTML(branch.qf)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            html += `
+                <div class="col-span-3 flex flex-col">
+                    <div class="grid grid-cols-2 gap-4 mb-4 text-center">
+                        <div class="bg-[#0f2942] py-2 px-2 rounded-xl border border-cyan-500/60 shadow">
+                            <div class="font-sport font-bold text-sm text-cyan-300">BÁN KẾT</div>
+                            <div class="text-xs text-slate-200">(Thứ 4 09/12)</div>
+                        </div>
+                        <div class="bg-[#2b210d] py-2 px-2 rounded-xl border border-amber-500 shadow">
+                            <div class="font-sport font-bold text-sm text-amber-400">CHUNG KẾT</div>
+                            <div class="text-xs text-slate-200">(Chủ nhật 13/12)</div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-2 gap-4 items-stretch bg-[#0e172a]/70 rounded-xl border border-slate-700/70 p-4">
+                        <div class="flex flex-col justify-around py-10 gap-8">
+                            ${(currentFilter === 'all' || currentFilter === 'tk1' || currentFilter === 'tk2') ? createMatchCardHTML('m261') : '<div></div>'}
+                            ${(currentFilter === 'all' || currentFilter === 'tk3' || currentFilter === 'tk4') ? createMatchCardHTML('m262') : '<div></div>'}
+                        </div>
+
+                        <div class="flex flex-col justify-center gap-8">
+                            <div id="podium-container">
+                                ${buildPodiumHTML()}
+                            </div>
+
+                            <div>
+                                <div class="text-center mb-2">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 font-sport font-bold text-xs uppercase tracking-wider">
+                                        🏆 Trận Chung Kết
+                                    </span>
+                                </div>
+                                ${createMatchCardHTML('m264')}
+                            </div>
+
+                            <div class="pt-4 border-t border-dashed border-slate-700">
+                                <div class="text-center mb-1.5">
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">
+                                        🥉 Tranh Hạng Ba
+                                    </span>
+                                </div>
+                                ${createMatchCardHTML('m263')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            html += `</div>`;
+            container.innerHTML = html;
+
+            requestAnimationFrame(drawBracketLines);
+        }
+
+        function renderFinalsOnlyHTML() {
+            const qfIds = ['m257', 'm258', 'm259', 'm260'];
+            return `
+                <div class="bg-[#0e172a]/85 rounded-2xl border border-slate-700 p-6">
+                    <div class="grid grid-cols-3 gap-12 mb-6 text-center">
+                        <div class="bg-[#152445] py-2.5 px-4 rounded-xl border border-blue-500/70">
+                            <div class="font-sport font-bold text-base text-amber-400">TỨ KẾT (Chủ nhật 06/12)</div>
+                            <div class="text-xs text-slate-300">4 trận tranh vé vào Bán kết</div>
+                        </div>
+                        <div class="bg-[#0f2942] py-2.5 px-4 rounded-xl border border-cyan-500/70">
+                            <div class="font-sport font-bold text-base text-cyan-300">BÁN KẾT (Thứ 4 09/12)</div>
+                            <div class="text-xs text-slate-300">Thắng vào Chung kết • Thua tranh Hạng 3</div>
+                        </div>
+                        <div class="bg-[#2b210d] py-2.5 px-4 rounded-xl border border-amber-500">
+                            <div class="font-sport font-bold text-base text-amber-400">CHUNG KẾT (Chủ nhật 13/12)</div>
+                            <div class="text-xs text-slate-300">Tranh Cúp Vô Địch &amp; Huy Chương Đồng</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-12 items-stretch min-h-[580px]">
+                        <div class="flex flex-col justify-between gap-5">
+                            ${qfIds.map(id => createMatchCardHTML(id)).join('')}
+                        </div>
+                        <div class="flex flex-col justify-around py-10 gap-8">
+                            ${createMatchCardHTML('m261')}
+                            ${createMatchCardHTML('m262')}
+                        </div>
+                        <div class="flex flex-col justify-center gap-8">
+                            <div id="podium-container">
+                                ${buildPodiumHTML()}
+                            </div>
+                            <div>
+                                <div class="text-center mb-2">
+                                    <span class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 font-sport font-bold text-xs">
+                                        🏆 CHUNG KẾT GIẢI ĐẤU 2026
+                                    </span>
+                                </div>
+                                ${createMatchCardHTML('m264')}
+                            </div>
+                            <div class="pt-4 border-t border-dashed border-slate-700">
+                                <div class="text-center mb-1.5">
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">
+                                        🥉 TRANH HẠNG BA
+                                    </span>
+                                </div>
+                                ${createMatchCardHTML('m263')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * =====================================================================
+         * 4. CẬP NHẬT CỤC BỘ KHI ADMIN NHẬP TỈ SỐ (GIỮ NGUYÊN FOCUS & CON TRỎ)
+         * =====================================================================
+         */
+        function handleScoreInput(e) {
+            if (!isAdmin) return;
+
+            const input = e.target;
+            if (!input.matches('.score-input, .pen-input')) return;
+
+            const matchId = input.getAttribute('data-match');
+            const field = input.getAttribute('data-field');
+            const m = matchState[matchId];
+            if (!m) return;
+
+            const cleaned = input.value.replace(/[^0-9]/g, '').slice(0, 2);
+            if (input.value !== cleaned) {
+                input.value = cleaned;
+            }
+
+            const selStart = input.selectionStart;
+            const selEnd = input.selectionEnd;
+
+            m[field] = cleaned;
+
+            const changedIds = recalculateAllMatches(true);
+            changedIds.add(matchId);
+
+            changedIds.forEach(id => {
+                const cardEl = document.getElementById(id);
+                if (cardEl) {
+                    cardEl.innerHTML = buildMatchInnerHTML(matchState[id]);
+                }
+            });
+
+            const podiumContainer = document.getElementById('podium-container');
+            if (podiumContainer) {
+                podiumContainer.innerHTML = buildPodiumHTML();
+            }
+
+            const restoredInput = document.querySelector(`input[data-match="${matchId}"][data-field="${field}"]`);
+            if (restoredInput) {
+                restoredInput.focus();
+                try {
+                    restoredInput.setSelectionRange(selStart, selEnd);
+                } catch (_) { }
+            }
+
+            requestAnimationFrame(drawBracketLines);
+        }
+
+        /**
+         * =====================================================================
+         * 5. VẼ ĐƯỜNG NỐI NHÁNH ĐẤU SVG VUÔNG GÓC CHÍNH XÁC
+         * =====================================================================
+         */
+        function drawBracketLines() {
+            const captureEl = document.getElementById('bracket-capture');
+            const svg = document.getElementById('bracket-svg-layer');
+            if (!captureEl || !svg) return;
+
+            const containerRect = captureEl.getBoundingClientRect();
+            const width = captureEl.offsetWidth;
+            const height = captureEl.offsetHeight;
+
+            svg.setAttribute('width', width);
+            svg.setAttribute('height', height);
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+            let paths = '';
+            const matchCards = captureEl.querySelectorAll('[data-next]');
+
+            matchCards.forEach(sourceEl => {
+                const targetId = sourceEl.getAttribute('data-next');
+                if (!targetId) return;
+
+                const targetEl = document.getElementById(targetId);
+                if (!targetEl) return;
+
+                const sRect = sourceEl.getBoundingClientRect();
+                const tRect = targetEl.getBoundingClientRect();
+
+                const x1 = sRect.right - containerRect.left;
+                const y1 = sRect.top + sRect.height / 2 - containerRect.top;
+                const x2 = tRect.left - containerRect.left;
+                const y2 = tRect.top + tRect.height / 2 - containerRect.top;
+
+                const midX = x1 + (x2 - x1) * 0.5;
+
+                const sourceMatch = matchState[sourceEl.id];
+                const hasWinner = sourceMatch && sourceMatch.winnerIndex !== null;
+
+                let strokeColor = hasWinner ? '#10b981' : '#3b5278';
+                let strokeWidth = hasWinner ? '2.2' : '1.7';
+
+                if (['m257', 'm258', 'm259', 'm260'].includes(sourceEl.id)) {
+                    strokeColor = hasWinner ? '#22d3ee' : '#0284c7';
+                    strokeWidth = '2.3';
+                } else if (['m261', 'm262'].includes(sourceEl.id)) {
+                    strokeColor = hasWinner ? '#fbbf24' : '#b45309';
+                    strokeWidth = '2.6';
+                }
+
+                paths += `
+                    <path
+                        d="M ${x1.toFixed(1)} ${y1.toFixed(1)} H ${midX.toFixed(1)} V ${y2.toFixed(1)} H ${x2.toFixed(1)}"
+                        fill="none"
+                        stroke="${strokeColor}"
+                        stroke-width="${strokeWidth}"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    <circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2.5" fill="${strokeColor}" />
+                    <circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="2.5" fill="${strokeColor}" />
+                `;
+            });
+
+            svg.innerHTML = paths;
+        }
+
+        /**
+         * =====================================================================
+         * 6. XUẤT ẢNH PNG ĐỘ PHÂN GIẢI CAO (HỖ TRỢ CẢ CHẾ ĐỘ XEM & ADMIN)
+         * =====================================================================
+         */
+        let toastTimer = null;
+        function showToast(message, isLoading = true) {
+            const toast = document.getElementById('toast-notification');
+            const spinner = document.getElementById('toast-spinner');
+            const msgEl = document.getElementById('toast-message');
+
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+                toastTimer = null;
+            }
+
+            msgEl.textContent = message;
+            spinner.style.display = isLoading ? 'block' : 'none';
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+
+            if (!isLoading) {
+                toastTimer = setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('flex');
+                }, 3200);
+            }
+        }
+
+        async function exportBracketToPNG() {
+            const btn = document.getElementById('export-png-btn');
+            const captureEl = document.getElementById('bracket-capture');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            showToast('Đang xuất ảnh PNG sắc nét (scale 2x)... Vui lòng đợi giây lát.', true);
+
+            drawBracketLines();
+            await new Promise(resolve => setTimeout(resolve, 150));
+
+            try {
+                const canvas = await html2canvas(captureEl, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#0b1120',
+                    width: captureEl.offsetWidth,
+                    height: captureEl.offsetHeight,
+                    windowWidth: captureEl.offsetWidth + 100,
+                    windowHeight: captureEl.offsetHeight + 100,
+                    scrollX: 0,
+                    scrollY: 0,
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        // 1. Chuyển ô input (chế độ Admin) thành thẻ span chuẩn broadcast
+                        const scoreInputs = clonedDoc.querySelectorAll('.score-input');
+                        scoreInputs.forEach(inp => {
+                            const val = inp.value.trim();
+                            if (val === '') {
+                                inp.style.display = 'none';
+                            } else {
+                                const span = clonedDoc.createElement('span');
+                                const isWin = inp.classList.contains('score-win');
+                                span.textContent = val;
+                                span.style.cssText = `
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    min-width: 28px;
+                                    height: 22px;
+                                    padding: 0 6px;
+                                    border-radius: 5px;
+                                    font-family: 'Chakra Petch', sans-serif;
+                                    font-weight: 700;
+                                    font-size: 13px;
+                                    background: ${isWin ? 'rgba(16, 185, 129, 0.22)' : 'rgba(15, 23, 42, 0.9)'};
+                                    color: ${isWin ? '#34d399' : '#e2e8f0'};
+                                    border: 1px solid ${isWin ? '#10b981' : '#334155'};
+                                `;
+                                inp.replaceWith(span);
+                            }
+                        });
+
+                        // 2. Ẩn dấu gạch ngang trống (chế độ Người xem) để ảnh sạch gọn
+                        const emptyBadges = clonedDoc.querySelectorAll('.score-badge.score-empty');
+                        emptyBadges.forEach(badge => {
+                            badge.style.display = 'none';
+                        });
+
+                        // 3. Chuyển dòng PEN có input thành nhãn broadcast
+                        const penRows = clonedDoc.querySelectorAll('.pen-row');
+                        penRows.forEach(row => {
+                            const penInputs = row.querySelectorAll('.pen-input');
+                            if (penInputs.length === 0) return; // Đã ở dạng hiển thị sẵn (Viewer)
+                            const v1 = penInputs[0] ? penInputs[0].value.trim() : '';
+                            const v2 = penInputs[1] ? penInputs[1].value.trim() : '';
+                            if (v1 === '' && v2 === '') {
+                                row.style.display = 'none';
+                            } else {
+                                row.innerHTML = `
+                                    <span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: #fcd34d; font-size: 11px;">⚽ LUÂN LƯU (PEN)</span>
+                                    <span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: #fef08a; font-size: 12px; background: rgba(245,158,11,0.2); padding: 1px 8px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.5);">
+                                        ${v1 || '0'} - ${v2 || '0'}
+                                    </span>
+                                `;
+                            }
+                        });
+                    }
+                });
+
+                const imageURL = canvas.toDataURL('image/png', 1.0);
+                const link = document.createElement('a');
+                link.href = imageURL;
+                link.download = 'so-do-thi-dau-thpt-ha-noi-2026.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast('Đã xuất ảnh so-do-thi-dau-thpt-ha-noi-2026.png thành công!', false);
+            } catch (error) {
+                console.error('Lỗi khi xuất PNG:', error);
+                showToast('Có lỗi xảy ra khi xuất ảnh. Vui lòng thử lại!', false);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
+
+        /**
+         * =====================================================================
+         * 7. KHỞI CHẠY & GẮN SỰ KIỆN TƯƠNG TÁC
+         * =====================================================================
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            initState();
+            loadAdminSession();
+
+            // Hiển thị nhanh dữ liệu lưu tạm (nếu có) trước khi đồng bộ online
+            const cachedScores = loadScoresFromLocalCache();
+            if (cachedScores) {
+                applyScoresPayload(cachedScores, false);
+            } else {
+                renderBracket();
+            }
+
+            // Tải tỉ số mới nhất từ Firebase Realtime Database
+            loadScoresFromCloud(false);
+
+            // Tự động làm mới âm thầm cho người xem để cập nhật tỉ số khi giải đang diễn ra
+            setInterval(() => {
+                if (!isAdmin && document.visibilityState === 'visible' && getFirebaseEndpoint()) {
+                    loadScoresFromCloud(true);
+                }
+            }, ADMIN_CONFIG.autoRefreshMs);
+
+            // Event delegation cho toàn bộ ô nhập tỉ số và PEN
+            const bracketContent = document.getElementById('bracket-content');
+            bracketContent.addEventListener('input', handleScoreInput);
+
+            // Nút Làm mới tỉ số
+            document.getElementById('refresh-data-btn').addEventListener('click', async () => {
+                await loadScoresFromCloud(false);
+                showToast('Đã kiểm tra và cập nhật tỉ số mới nhất!', false);
+            });
+
+            // Modal Đăng nhập / Đăng xuất Admin
+            const loginModal = document.getElementById('login-modal');
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('admin-username');
+            const passwordInput = document.getElementById('admin-password');
+            const loginError = document.getElementById('login-error');
+
+            const openLoginModal = () => {
+                loginError.classList.add('hidden');
+                usernameInput.value = '';
+                passwordInput.value = '';
+                loginModal.classList.remove('hidden');
+                loginModal.classList.add('flex');
+                setTimeout(() => usernameInput.focus(), 50);
+            };
+
+            const closeLoginModal = () => {
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex');
+            };
+
+            document.getElementById('admin-login-btn').addEventListener('click', openLoginModal);
+            document.getElementById('cancel-login-btn').addEventListener('click', closeLoginModal);
+            loginModal.addEventListener('click', (e) => {
+                if (e.target === loginModal) closeLoginModal();
+            });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const u = usernameInput.value.trim();
+                const p = passwordInput.value;
+
+                if (u === ADMIN_CONFIG.username && p === ADMIN_CONFIG.password) {
+                    closeLoginModal();
+                    setAdminSession(true);
+                    showToast('Đăng nhập Admin thành công! Bạn có thể nhập tỉ số.', false);
+                } else {
+                    loginError.classList.remove('hidden');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            });
+
+            document.getElementById('admin-logout-btn').addEventListener('click', () => {
+                setAdminSession(false);
+                showToast('Đã thoát chế độ Admin (Chuyển về chế độ chỉ xem).', false);
+            });
+
+            // Lưu / Nạp file dự phòng (.json - chỉ Admin)
+            const exportJsonBtn = document.getElementById('export-json-btn');
+            const importJsonBtn = document.getElementById('import-json-btn');
+            const importJsonInput = document.getElementById('import-json-input');
+
+            exportJsonBtn.addEventListener('click', () => {
+                if (!isAdmin) return;
+                exportScoresToJSON();
+            });
+
+            importJsonBtn.addEventListener('click', () => {
+                if (!isAdmin) return;
+                importJsonInput.value = '';
+                importJsonInput.click();
+            });
+
+            importJsonInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file) importScoresFromJSON(file);
+            });
+
+            // Chuyển Tab lọc nhánh
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => {
+                        b.classList.remove('bg-cyan-400', 'text-slate-950', 'shadow-md');
+                        b.classList.add('bg-slate-800/90', 'text-slate-200');
+                    });
+                    btn.classList.remove('bg-slate-800/90', 'text-slate-200');
+                    btn.classList.add('bg-cyan-400', 'text-slate-950', 'shadow-md');
+
+                    currentFilter = btn.getAttribute('data-filter');
+                    renderBracket();
+                });
+            });
+
+            // Tìm kiếm & nhảy tới trường
+            const searchInput = document.getElementById('search-input');
+            const clearSearchBtn = document.getElementById('clear-search');
+
+            searchInput.addEventListener('input', (e) => {
+                currentSearch = e.target.value.trim();
+                clearSearchBtn.classList.toggle('hidden', currentSearch.length === 0);
+                renderBracket();
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && currentSearch.length > 0) {
+                    const firstHit = document.querySelector('.team-search-hit');
+                    if (firstHit) {
+                        firstHit.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    }
+                }
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                currentSearch = '';
+                clearSearchBtn.classList.add('hidden');
+                renderBracket();
+            });
+
+            // Modal xác nhận Đặt lại tỉ số (chỉ Admin)
+            const resetModal = document.getElementById('reset-modal');
+            const openResetBtn = document.getElementById('reset-scores-btn');
+            const cancelResetBtn = document.getElementById('cancel-reset-btn');
+            const confirmResetBtn = document.getElementById('confirm-reset-btn');
+
+            openResetBtn.addEventListener('click', () => {
+                if (!isAdmin) return;
+                resetModal.classList.remove('hidden');
+                resetModal.classList.add('flex');
+            });
+
+            const closeResetModal = () => {
+                resetModal.classList.add('hidden');
+                resetModal.classList.remove('flex');
+            };
+
+            cancelResetBtn.addEventListener('click', closeResetModal);
+            resetModal.addEventListener('click', (e) => {
+                if (e.target === resetModal) closeResetModal();
+            });
+
+            confirmResetBtn.addEventListener('click', () => {
+                if (!isAdmin) return;
+                MATCH_DEFINITIONS.forEach(def => {
+                    const m = matchState[def.id];
+                    m.s1 = '';
+                    m.s2 = '';
+                    m.p1 = '';
+                    m.p2 = '';
+                    m.winnerIndex = null;
+                    m.loserIndex = null;
+                    if (!def.initTeams) {
+                        m.teams = [null, null];
+                    }
+                });
+                recalculateAllMatches(false);
+                renderBracket();
+                saveScoresToCloud(true);
+                closeResetModal();
+                showToast('Đã đặt lại toàn bộ tỉ số về mặc định.', false);
+            });
+
+            // Đóng modal bằng phím Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeLoginModal();
+                    closeResetModal();
+                }
+            });
+
+            // Nút xuất ảnh PNG
+            document.getElementById('export-png-btn').addEventListener('click', exportBracketToPNG);
+
+            // Vẽ lại đường nối khi resize cửa sổ
+            window.addEventListener('resize', () => {
+                requestAnimationFrame(drawBracketLines);
+            });
+        });
+    </script>
+</body>
+
+</html>
